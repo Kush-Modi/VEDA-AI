@@ -3,7 +3,10 @@
 VedaAI is a full-stack web application designed to help teachers quickly generate high-quality question papers, assignments, and lesson plans using AI. You just upload your source material, set your parameters (like question types and difficulty), and the app handles the rest.
 
 <!-- Add your first screenshot here (e.g. Dashboard view) -->
-![Dashboard Screenshot Placeholder](docs/screenshot1.png)
+<img width="1860" height="883" alt="image" src="https://github.com/user-attachments/assets/6a3ccf93-d905-4e44-9725-73d1c6462be9" />
+<img width="1829" height="889" alt="image" src="https://github.com/user-attachments/assets/54cd62f4-d5eb-47c6-863b-3f238284bf48" />
+
+
 
 ## Features
 
@@ -14,7 +17,8 @@ VedaAI is a full-stack web application designed to help teachers quickly generat
 - **PDF Export:** Preview the generated paper and export it directly to a print-ready PDF.
 
 <!-- Add your second screenshot here (e.g. Create Assignment Form) -->
-![Create Assignment Screenshot Placeholder](docs/screenshot2.png)
+<img width="1833" height="872" alt="image" src="https://github.com/user-attachments/assets/444b2886-fb10-4811-9d94-dca171cd4448" />
+
 
 ## Tech Stack
 
@@ -41,7 +45,8 @@ Here is what powers VedaAI under the hood:
 - Vercel (Frontend hosting)
 
 <!-- Add your third screenshot here (e.g. Generated PDF Preview) -->
-![PDF Preview Screenshot Placeholder](docs/screenshot3.png)
+<img width="1406" height="767" alt="image" src="https://github.com/user-attachments/assets/71fbf460-96a7-4d7c-9876-ae4cc86c8a84" />
+
 
 ## Local Development
 
