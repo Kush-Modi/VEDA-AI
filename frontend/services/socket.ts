@@ -4,14 +4,18 @@ let socket: Socket | null = null;
 
 export const getSocket = (): Socket => {
   if (!socket) {
-    const rawUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL;
+    let rawUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL;
     if (!rawUrl) {
-      console.warn('Socket URL missing. Please set NEXT_PUBLIC_SOCKET_URL.');
+      console.warn('Socket URL missing. Falling back to local development defaults.');
+      rawUrl = 'http://localhost:5000';
     }
-    const cleanUrl = rawUrl ? rawUrl.replace(/\/$/, '') : '';
+    const cleanUrl = rawUrl.replace(/\/$/, '');
     
     socket = io(cleanUrl, {
       transports: ['websocket'],
+      autoConnect: true,
+      reconnection: true,
+      reconnectionDelay: 1000,
     });
 
     socket.on('connect', () => {

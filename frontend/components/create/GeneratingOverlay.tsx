@@ -30,12 +30,18 @@ export function GeneratingOverlay({ assignmentId, onComplete }: GeneratingOverla
         console.log("Fetching paper");
         
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/paper/${assignmentId}`);
+          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+          const token = localStorage.getItem('vedaai_token');
+          
+          const res = await fetch(`${baseUrl}/api/paper/${assignmentId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
           const result = await res.json();
           
           if (result.success && result.paper) {
             console.log("Paper loaded");
-            console.log(result.paper);
             setPaper(result.paper, assignmentId);
             toast.success('Question paper generated successfully!');
           } else {

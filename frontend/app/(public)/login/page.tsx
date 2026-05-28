@@ -40,8 +40,11 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center min-h-[80vh]">
       <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full mx-4">
-        <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Welcome Back</h2>
-        <p className="text-slate-500 mb-8">Sign in to your VedaAI account to continue.</p>
+        <div className="flex justify-center mb-6">
+          <img src="/logo.png" alt="VedaAI Logo" className="h-12 w-auto" />
+        </div>
+        <h2 className="text-3xl font-extrabold text-slate-900 mb-2 text-center">Welcome Back</h2>
+        <p className="text-slate-500 mb-8 text-center">Sign in to your VedaAI account to continue.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

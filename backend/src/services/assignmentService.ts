@@ -22,11 +22,11 @@ export const assignmentService = {
     };
   },
 
-  getAssignments: async () => {
-    return await Assignment.find().sort({ createdAt: -1 });
+  getAssignments: async (createdBy: string) => {
+    return await Assignment.find({ createdBy }).sort({ createdAt: -1 });
   },
 
-  deleteAssignment: async (id: string) => {
-    return await Assignment.findByIdAndDelete(id);
+  deleteAssignment: async (id: string, createdBy: string) => {
+    return await Assignment.findOneAndDelete({ _id: id, createdBy });
   }
 };

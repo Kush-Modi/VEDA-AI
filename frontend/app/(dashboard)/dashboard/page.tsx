@@ -6,12 +6,15 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/assignment`)
+    if (!token) return;
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/assignment`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -20,7 +23,7 @@ export default function Dashboard() {
       })
       .catch(err => console.error("Error fetching dashboard stats:", err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   const totalAssignments = assignments.length;
   const completedAssignments = assignments.filter(a => a.status === 'completed').length;

@@ -18,11 +18,14 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [assignmentsCount, setAssignmentsCount] = useState(0);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/assignment`)
+    if (!token) return;
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/assignment`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.data) {
@@ -30,13 +33,13 @@ export function Sidebar() {
         }
       })
       .catch(err => console.error("Error fetching assignments:", err));
-  }, []);
+  }, [token]);
 
   return (
     <aside className="hidden md:flex flex-col w-[250px] border-r border-border bg-card h-screen sticky top-0">
       <div className="p-6">
         <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-          <span className="bg-primary text-primary-foreground p-1 rounded-md text-sm">V</span>
+          <img src="/logo.png" alt="VedaAI Logo" className="w-8 h-8 object-contain" />
           VedaAI
         </h1>
       </div>
@@ -89,8 +92,12 @@ export function Sidebar() {
         </Link>
         
         <div className="bg-secondary/50 p-3 rounded-xl flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0 uppercase">
-            {user?.name?.[0] || 'U'}
+          <div className="w-10 h-10 rounded-full border-2 border-primary/20 bg-primary/10 overflow-hidden shrink-0 flex items-center justify-center">
+            {user?.avatar ? (
+              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-primary font-bold text-xs uppercase">{user?.name?.[0] || 'U'}</span>
+            )}
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="font-semibold text-sm text-foreground truncate">{user?.name || 'Loading...'}</span>

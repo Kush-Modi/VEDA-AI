@@ -1,44 +1,50 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { generateQuestionPaperText } from '../services/geminiService';
-import { parseGeminiJSON } from '../utils/parseGemini';
 
 export const toolkitController = {
-  generateLessonPlan: async (req: Request, res: Response, next: NextFunction) => {
+  generateLessonPlan: async (req: Request, res: Response) => {
     try {
-      const { subject, chapter, class: className } = req.body;
+      const { chapterName, className, subject, duration } = req.body;
 
-      if (!subject || !chapter || !className) {
-        res.status(400).json({ success: false, error: 'Subject, chapter, and class are required' });
-        return;
+      if (!chapterName || !className || !subject || !duration) {
+        return res.status(400).json({ success: false, error: 'Missing required fields' });
       }
 
       const prompt = `
-Generate only a simple lesson outline for Class ${className} on the subject "${subject}", specifically for the chapter "${chapter}".
+Act as an expert teacher and curriculum designer. 
+Create a detailed, engaging lesson plan for a class with the following details:
+Chapter Name: ${chapterName}
+Class: ${className}
+Subject: ${subject}
+Duration: ${duration}
 
-Return a strict JSON object with this EXACT structure:
+Return the response STRICTLY as a JSON object matching this structure exactly (do not include any markdown formatting around the JSON, just the JSON string itself):
+
 {
-  "title": "Lesson Title Here",
-  "subtopics": [
-    "Subtopic 1",
-    "Subtopic 2",
-    "Subtopic 3"
-  ]
+  "subtopics": ["Subtopic 1", "Subtopic 2", "Subtopic 3"],
+  "learningObjectives": ["Objective 1", "Objective 2", "Objective 3"],
+  "teachingFlow": [
+    { "time": "0-10 mins", "activity": "Introduction and Hook" },
+    { "time": "10-30 mins", "activity": "Main Concept Delivery" }
+  ],
+  "recapTopics": ["Recap 1", "Recap 2"],
+  "homeworkSuggestions": ["Homework 1", "Homework 2"]
 }
-
-No extra explanations, no paragraphs, no markdown outside of the JSON block.
       `;
 
       const rawResponse = await generateQuestionPaperText(prompt);
-      const parsedData = parseGeminiJSON(rawResponse);
-
-      if (!parsedData || !parsedData.title || !parsedData.subtopics) {
-        throw new Error('Invalid JSON format received from Gemini');
+      
+      let parsedData;
+      try {
+        const cleanJson = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+        parsedData = JSON.parse(cleanJson);
+      } catch (err) {
+        throw new Error('Failed to parse Gemini output into JSON');
       }
 
-      res.status(200).json({ success: true, data: parsedData });
-    } catch (error) {
-      console.error('Lesson Plan Generation Error:', error);
-      res.status(500).json({ success: false, error: 'Failed to generate lesson plan' });
+      res.json({ success: true, data: parsedData });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
     }
   }
 };

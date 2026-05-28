@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { toolkitController } from '../controllers/toolkitController';
+import { protect } from '../middleware/authMiddleware';
 
 const router = Router();
 
-router.post('/lesson-plan', toolkitController.generateLessonPlan);
+router.use(protect);
+
+router.post('/lesson-planner', toolkitController.generateLessonPlan);
 
 export default router;

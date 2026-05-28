@@ -30,7 +30,7 @@ export const signup = async (req: Request, res: Response) => {
     res.status(201).json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, school: user.school, role: user.role }
+      user: { id: user._id, name: user.name, email: user.email, school: user.school, schoolLocation: user.schoolLocation, avatar: user.avatar, role: user.role }
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -58,7 +58,7 @@ export const login = async (req: Request, res: Response) => {
     res.json({
       success: true,
       token,
-      user: { id: user._id, name: user.name, email: user.email, school: user.school, role: user.role }
+      user: { id: user._id, name: user.name, email: user.email, school: user.school, schoolLocation: user.schoolLocation, avatar: user.avatar, role: user.role }
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -69,9 +69,9 @@ export const updateProfile = async (req: Request, res: Response) => {
   try {
     // Requires auth middleware to set req.user
     const userId = (req as any).user.id;
-    const { name, school, email, password } = req.body;
+    const { name, school, schoolLocation, avatar, email, password } = req.body;
 
-    const updates: any = { name, school, email };
+    const updates: any = { name, school, schoolLocation, avatar, email };
     
     if (password) {
       const salt = await bcrypt.genSalt(10);
@@ -83,7 +83,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email, school: user.school, role: user.role }
+      user: { id: user._id, name: user.name, email: user.email, school: user.school, schoolLocation: user.schoolLocation, avatar: user.avatar, role: user.role }
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -101,7 +101,7 @@ export const getMe = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email, school: user.school, role: user.role }
+      user: { id: user._id, name: user.name, email: user.email, school: user.school, schoolLocation: user.schoolLocation, avatar: user.avatar, role: user.role }
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });

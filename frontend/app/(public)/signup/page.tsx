@@ -42,8 +42,11 @@ export default function Signup() {
   return (
     <div className="flex items-center justify-center min-h-[80vh] py-12">
       <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full mx-4">
-        <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Create Account</h2>
-        <p className="text-slate-500 mb-8">Join VedaAI to start creating AI assessments.</p>
+        <div className="flex justify-center mb-6">
+          <img src="/logo.png" alt="VedaAI Logo" className="h-12 w-auto" />
+        </div>
+        <h2 className="text-3xl font-extrabold text-slate-900 mb-2 text-center">Create Account</h2>
+        <p className="text-slate-500 mb-8 text-center">Join VedaAI to automate your grading and assignments.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -7,11 +7,13 @@ import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PaperPreviewPage() {
   const params = useParams();
   const id = params.id as string;
   const { generatedPaper, assignmentId, setPaper, loading, setLoading } = usePaperStore();
+  const { token } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -26,7 +28,9 @@ export default function PaperPreviewPage() {
       }
       
       setLoading(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/paper/${id}`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/paper/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.paper) {
@@ -38,7 +42,7 @@ export default function PaperPreviewPage() {
         .catch(err => console.error("Error fetching paper on load:", err))
         .finally(() => setLoading(false));
     }
-  }, [isMounted, id, generatedPaper, assignmentId, setPaper, setLoading]);
+  }, [isMounted, id, generatedPaper, assignmentId, setPaper, setLoading, token]);
 
   if (!isMounted) return null;
 

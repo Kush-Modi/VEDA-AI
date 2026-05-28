@@ -8,6 +8,8 @@ interface User {
   name: string;
   email: string;
   school: string;
+  schoolLocation: string;
+  avatar: string;
   role: string;
 }
 

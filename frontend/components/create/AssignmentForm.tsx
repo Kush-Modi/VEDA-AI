@@ -12,10 +12,15 @@ import { Button } from '../ui/button';
 import { Plus, ArrowRight, ArrowLeft } from 'lucide-react';
 import { assignmentService } from '@/services/assignmentService';
 import { GeneratingOverlay } from './GeneratingOverlay';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const formSchema = z.object({
+  groupId: z.string().optional(),
+  className: z.string().optional(),
+  section: z.string().optional(),
+  subject: z.string().optional(),
   instructions: z.string().optional(),
   dueDate: z.string().optional(),
 });
@@ -35,8 +40,28 @@ export function AssignmentForm() {
     resolver: zodResolver(formSchema),
   });
   
+  const { token } = useAuth();
+  
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [useExistingGroup, setUseExistingGroup] = useState(true);
+
+  // Fetch groups on mount
+  useEffect(() => {
+    if (!token) return;
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/groups`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setGroups(data.data);
+          if (data.data.length === 0) setUseExistingGroup(false);
+        }
+      })
+      .catch(err => console.error("Error fetching groups:", err));
+  }, [token]);
 
   const addQuestionType = () => {
     updateQuestionTypes([
@@ -65,6 +90,16 @@ export function AssignmentForm() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      if (data.dueDate) {
+        const selectedDate = new Date(data.dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate < today) {
+          toast.error('Due date cannot be in the past');
+          return;
+        }
+      }
+
       // Start generating UI
       setIsGenerating(true);
 
@@ -78,6 +113,14 @@ export function AssignmentForm() {
         marks: q.marks || 1
       }))));
 
+      if (useExistingGroup && data.groupId) {
+        formData.append('groupId', data.groupId);
+      } else {
+        formData.append('className', data.className || '');
+        formData.append('section', data.section || '');
+        formData.append('subject', data.subject || '');
+      }
+
       if (uploadedFile) {
         formData.append('file', uploadedFile);
         console.log("File uploaded");
@@ -85,6 +128,9 @@ export function AssignmentForm() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/assignment`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
         body: formData
       });
 
@@ -143,10 +189,64 @@ export function AssignmentForm() {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-slate-800">Due Date</h3>
+        <h3 className="text-lg font-bold text-slate-800">Class Information</h3>
+        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+          <div className="flex gap-4 mb-4">
+            <Button
+              type="button"
+              variant={useExistingGroup ? "default" : "outline"}
+              onClick={() => setUseExistingGroup(true)}
+              disabled={groups.length === 0}
+              className={useExistingGroup ? "bg-slate-900 text-white rounded-xl" : "rounded-xl"}
+            >
+              Use Existing Group
+            </Button>
+            <Button
+              type="button"
+              variant={!useExistingGroup ? "default" : "outline"}
+              onClick={() => setUseExistingGroup(false)}
+              className={!useExistingGroup ? "bg-slate-900 text-white rounded-xl" : "rounded-xl"}
+            >
+              Create New Group Details
+            </Button>
+          </div>
+
+          {useExistingGroup ? (
+            <div className="w-full">
+              <label className="text-sm font-medium text-slate-700">Select Group</label>
+              <select 
+                {...register('groupId')}
+                className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none"
+              >
+                <option value="">-- Select a Group --</option>
+                {groups.map(g => (
+                  <option key={g._id} value={g._id}>{g.className} - {g.section} ({g.subject})</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700">Class Name</label>
+                <input {...register('className')} placeholder="e.g. 10th Grade" className="w-full mt-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Section</label>
+                <input {...register('section')} placeholder="e.g. A" className="w-full mt-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700">Subject</label>
+                <input {...register('subject')} placeholder="e.g. Science" className="w-full mt-1 px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <h3 className="text-lg font-bold text-slate-800 mt-6">Due Date</h3>
         <input 
           type="date" 
-          className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          min={new Date().toISOString().split('T')[0]}
+          className="flex h-12 w-full max-w-sm rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
           {...register('dueDate')}
         />
       </div>

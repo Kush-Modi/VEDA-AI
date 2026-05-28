@@ -20,3 +20,27 @@ export const getPaperByAssignmentId = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+export const getLibrary = async (req: Request, res: Response) => {
+  try {
+    const createdBy = (req as any).user.id;
+    
+    // We want to find GeneratedPapers that belong to Assignments created by this user
+    // Since GeneratedPaper doesn't have createdBy, we must populate Assignment
+    const papers = await GeneratedPaper.find()
+      .populate({
+        path: 'assignmentId',
+        match: { createdBy },
+        select: 'title className subject createdAt'
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Filter out papers where assignmentId is null (meaning the assignment didn't match the createdBy filter)
+    const libraryPapers = papers.filter(p => p.assignmentId !== null);
+
+    res.json({ success: true, data: libraryPapers });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

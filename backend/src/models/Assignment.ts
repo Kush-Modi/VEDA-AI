@@ -11,6 +11,11 @@ export interface IAssignment extends Document {
   dueDate: Date;
   questionTypes: IQuestionType[];
   instructions: string;
+  groupId?: mongoose.Types.ObjectId;
+  className?: string;
+  section?: string;
+  subject?: string;
+  createdBy: mongoose.Types.ObjectId;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   filePath?: string;
   fileName?: string;
@@ -29,6 +34,11 @@ const AssignmentSchema = new Schema(
     dueDate: { type: Date, required: true },
     questionTypes: { type: [QuestionTypeSchema], required: true },
     instructions: { type: String, default: '' },
+    groupId: { type: Schema.Types.ObjectId, ref: 'Group' },
+    className: { type: String },
+    section: { type: String },
+    subject: { type: String },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     status: { 
       type: String, 
       enum: ['pending', 'processing', 'completed', 'failed'], 

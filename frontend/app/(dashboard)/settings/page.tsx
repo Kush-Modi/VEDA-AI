@@ -9,15 +9,19 @@ export default function Settings() {
   const { user, token, login } = useAuth();
   const [name, setName] = useState('');
   const [school, setSchool] = useState('');
+  const [schoolLocation, setSchoolLocation] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [avatar, setAvatar] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
       setName(user.name || '');
       setSchool(user.school || '');
+      setSchoolLocation(user.schoolLocation || '');
       setEmail(user.email || '');
+      setAvatar(user.avatar || '/images/avatar1.png');
     }
   }, [user]);
 
@@ -32,7 +36,7 @@ export default function Settings() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ name, school, email, password }),
+        body: JSON.stringify({ name, school, schoolLocation, email, password, avatar }),
       });
       const data = await res.json();
 
@@ -81,6 +85,34 @@ export default function Settings() {
           </div>
 
           <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">School Address / Location</label>
+            <input 
+              type="text" 
+              value={schoolLocation}
+              onChange={(e) => setSchoolLocation(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
+          <div className="pt-6 border-t border-slate-100">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Profile Picture</h3>
+            <div className="flex flex-wrap gap-4">
+              {[1, 2, 3, 4, 5].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setAvatar(`/images/avatar${num}.png`)}
+                  className={`w-16 h-16 rounded-full border-4 transition-all overflow-hidden ${
+                    avatar === `/images/avatar${num}.png` ? 'border-primary scale-110 shadow-lg' : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <img src={`/images/avatar${num}.png`} alt={`Avatar ${num}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-slate-100">
             <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
             <input 
               type="email" 

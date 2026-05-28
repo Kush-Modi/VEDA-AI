@@ -50,7 +50,7 @@ export function QuestionPaper({ paper }: QuestionPaperProps) {
           </Button>
           {isClient ? (
             <PDFDownloadLink
-              document={<GeneratedPDF paper={paper} />}
+              document={<GeneratedPDF paper={paper} user={user} />}
               fileName="Question_Paper.pdf"
             >
               {({ loading }) => (
